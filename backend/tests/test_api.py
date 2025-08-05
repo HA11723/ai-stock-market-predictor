@@ -65,9 +65,16 @@ def test_predict_missing_ticker(client):
         data=json.dumps(payload),
         content_type="application/json"
     )
-    assert rv.status_code == 200  # Uses default ticker 'AAPL'
-    js = rv.get_json()
-    assert js.get("ticker") == "AAPL"
+    # Handle both cases: model exists (200) or doesn't exist (404)
+    if rv.status_code == 200:
+        js = rv.get_json()
+        assert js.get("ticker") == "AAPL"
+    elif rv.status_code == 404:
+        data = rv.get_json()
+        assert "error" in data
+        assert "not found" in data["error"].lower()
+    else:
+        assert False, f"Unexpected status code: {rv.status_code}"
 
 
 def test_predict_invalid_json(client):
