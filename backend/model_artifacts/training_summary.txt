@@ -1,0 +1,20 @@
+Stock Prediction Models Training Summary
+==================================================
+Date: 2010-01-01 to 2025-01-01
+Window size: 60
+Epochs: 20
+Batch size: 32
+
+Successful Models:
+AAPL: RMSE=$6.18, MAE=$5.04, Val Loss=0.000599
+MSFT: RMSE=$8.17, MAE=$6.62, Val Loss=0.000335
+GOOGL: RMSE=$4.70, MAE=$3.73, Val Loss=0.000643
+TSLA: RMSE=$12.60, MAE=$9.41, Val Loss=0.000693
+AMZN: RMSE=$4.99, MAE=$3.79, Val Loss=0.000481
+NVDA: RMSE=$3.92, MAE=$2.56, Val Loss=0.000695
+META: RMSE=$12.70, MAE=$9.29, Val Loss=0.000429
+NFLX: RMSE=$18.66, MAE=$12.61, Val Loss=0.000403
+JPM: RMSE=$3.83, MAE=$2.81, Val Loss=0.000285
+BAC: RMSE=$0.91, MAE=$0.69, Val Loss=0.000448
+
+Failed: None
