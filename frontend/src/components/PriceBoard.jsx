@@ -1,12 +1,12 @@
 // File: frontend/src/components/PriceBoard.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { getQuotes } from '../services/api';
 
 export default function PriceBoard({ tickers }) {
   const [quotes, setQuotes] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchQuotes = async () => {
+  const fetchQuotes = useCallback(async () => {
     setLoading(true);
     try {
       const data = await getQuotes(tickers);
@@ -16,13 +16,13 @@ export default function PriceBoard({ tickers }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [tickers]);
 
   useEffect(() => {
     fetchQuotes();
-    const id = setInterval(fetchQuotes, 60_000);
+    const id = setInterval(fetchQuotes, 30_000); // Reduced to 30 seconds with backend caching
     return () => clearInterval(id);
-  }, [tickers]);
+  }, [fetchQuotes]);
 
   return (
     <div className="price-board">

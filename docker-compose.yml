@@ -1,4 +1,12 @@
 services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+
   backend:
     build: ./backend
     ports:
@@ -7,7 +15,10 @@ services:
       - ./backend/.env.backend
     volumes:
       - ./backend/model_artifacts:/app/model_artifacts
-
+    depends_on:
+      - redis
+    environment:
+      - REDIS_URL=redis://redis:6379/0
 
   frontend:
     build: ./frontend
@@ -17,3 +28,6 @@ services:
       - ./frontend/.env.frontend
     depends_on:
       - backend
+
+volumes:
+  redis_data:

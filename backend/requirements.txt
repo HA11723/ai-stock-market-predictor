@@ -46,3 +46,4 @@ Flask
 flask-cors
 gunicorn
 pytest
+redis>=4.5.0

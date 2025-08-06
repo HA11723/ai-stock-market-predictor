@@ -13,8 +13,8 @@ const getNextTradingDay = () => {
   const today = new Date();
   const futureDate = new Date(today);
 
-  // Simply add 2 days to ensure it's always in the future
-  futureDate.setDate(today.getDate() + 2);
+  // Add 1 day for next trading day prediction
+  futureDate.setDate(today.getDate() + 1);
 
   console.log("Today:", today.toDateString());
   console.log("Future prediction date:", futureDate.toDateString());
@@ -111,14 +111,14 @@ export default function App() {
                 <div className="card-header">
                   <span className="card-label">Current Price</span>
                   <span className="card-date">
-                    {formatDate(history[history.length - 1].date)}
+                    {formatDate(new Date().toISOString().split("T")[0])}
                   </span>
                 </div>
                 <div className="card-value">
                   ${history[history.length - 1].close.toFixed(2)}
                 </div>
                 <div className="card-footer">
-                  <span className="card-badge current-badge">Last Close</span>
+                  <span className="card-badge current-badge">Latest</span>
                 </div>
               </div>
 
