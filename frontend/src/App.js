@@ -1,11 +1,22 @@
 // File: frontend/src/App.js
 
 import React, { useState, useEffect } from "react";
-import "./App.css";
+import {
+  Container,
+  Box,
+  Typography,
+  CircularProgress,
+  Alert,
+  Fade,
+  Divider,
+} from "@mui/material";
 
 import { getPrediction } from "./services/api";
+import { ThemeContextProvider } from "./contexts/ThemeContext";
+import Header from "./components/Header";
 import SymbolPicker from "./components/SymbolPicker";
 import PredictionChart from "./components/PredictionChart";
+import PredictionResults from "./components/PredictionResults";
 import PriceBoard from "./components/PriceBoard";
 
 // Helper function to get next trading day - simplified approach
@@ -33,7 +44,7 @@ const formatDate = (dateString) => {
   });
 };
 
-export default function App() {
+function AppContent() {
   const [ticker, setTicker] = useState(null);
   const [history, setHistory] = useState([]);
   const [predPoint, setPredPoint] = useState(null);
@@ -72,97 +83,131 @@ export default function App() {
   }, [ticker]);
 
   return (
-    <div className="App">
-      <div className="app-container">
-        <header className="app-header">
-          <h1 className="app-title">AI Stock Predictor</h1>
-          <p className="app-subtitle">
-            Advanced stock price prediction powered by AI
-          </p>
-        </header>
+    <Box sx={{ minHeight: "100vh", pb: 4 }}>
+      <Header />
 
-        {/* Prediction section */}
-        <div className="prediction-section">
-          <h2 className="section-title">Stock Prediction</h2>
+      <Container maxWidth="xl">
+        {/* Prediction Section */}
+        <Box sx={{ mb: 6 }}>
+          <Box sx={{ textAlign: "center", mb: 4 }}>
+            <Typography
+              variant="h4"
+              component="h2"
+              sx={{
+                mb: 1,
+                fontWeight: 700,
+                color: "text.primary",
+              }}
+            >
+              Stock Prediction
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Enter a stock symbol to get AI-powered price predictions
+            </Typography>
+          </Box>
           <SymbolPicker onSubmit={handlePredict} disabled={loading} />
-        </div>
+        </Box>
 
+        {/* Loading State */}
         {loading && (
-          <div className="loader-container">
-            <div className="loader"></div>
-          </div>
+          <Fade in={loading}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                py: 8,
+              }}
+            >
+              <CircularProgress
+                size={60}
+                sx={{
+                  color: "#00ff88",
+                  mb: 2,
+                  "& .MuiCircularProgress-circle": {
+                    strokeLinecap: "round",
+                  },
+                }}
+              />
+              <Typography
+                variant="h6"
+                sx={{ color: "#00ff88", fontWeight: 600 }}
+              >
+                Analyzing {ticker} with AI...
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Processing historical data and generating predictions
+              </Typography>
+            </Box>
+          </Fade>
         )}
 
-        {error && <div className="error-message">{error}</div>}
+        {/* Error State */}
+        {error && (
+          <Fade in={Boolean(error)}>
+            <Alert
+              severity="error"
+              sx={{
+                mb: 4,
+                background: "rgba(255, 107, 107, 0.1)",
+                border: "1px solid rgba(255, 107, 107, 0.3)",
+                "& .MuiAlert-icon": {
+                  color: "#ff6b6b",
+                },
+              }}
+            >
+              {error}
+            </Alert>
+          </Fade>
+        )}
 
         {/* Chart Section */}
-        {history.length > 0 && predPoint && (
-          <div className="chart-section">
-            {console.log("Chart - predPoint.date:", predPoint.date)}
-            {console.log(
-              "Chart - formatted predPoint.date:",
-              formatDate(predPoint.date)
-            )}
-            <PredictionChart data={history} predictionPoint={predPoint} />
+        {history.length > 0 && predPoint && !loading && (
+          <Fade in={true} timeout={600}>
+            <Box sx={{ mb: 6 }}>
+              {console.log("Chart - predPoint.date:", predPoint.date)}
+              {console.log(
+                "Chart - formatted predPoint.date:",
+                formatDate(predPoint.date)
+              )}
+              <PredictionChart data={history} predictionPoint={predPoint} />
 
-            {/* Prediction Cards - Now below the chart */}
-            <div className="prediction-cards">
-              <div className="prediction-card current">
-                <div className="card-header">
-                  <span className="card-label">Current Price</span>
-                  <span className="card-date">
-                    {formatDate(new Date().toISOString().split("T")[0])}
-                  </span>
-                </div>
-                <div className="card-value">
-                  ${history[history.length - 1].close.toFixed(2)}
-                </div>
-                <div className="card-footer">
-                  <span className="card-badge current-badge">Latest</span>
-                </div>
-              </div>
-
-              <div className="prediction-card predicted">
-                <div className="card-header">
-                  <span className="card-label">AI Prediction</span>
-                  <span className="card-date">
-                    {formatDate(predPoint.date)}
-                  </span>
-                </div>
-                <div className="card-value">${predPoint.close.toFixed(2)}</div>
-                <div className="card-footer">
-                  <span className="card-badge prediction-badge">Predicted</span>
-                  <span
-                    className={`change-indicator ${
-                      predPoint.close > history[history.length - 1].close
-                        ? "positive"
-                        : "negative"
-                    }`}
-                  >
-                    {predPoint.close > history[history.length - 1].close
-                      ? "↗"
-                      : "↘"}
-                    {(
-                      ((predPoint.close - history[history.length - 1].close) /
-                        history[history.length - 1].close) *
-                      100
-                    ).toFixed(2)}
-                    %
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+              {/* Prediction Results Cards */}
+              <PredictionResults
+                history={history}
+                predPoint={predPoint}
+                ticker={ticker}
+              />
+            </Box>
+          </Fade>
         )}
 
-        {/* Live Stock Prices - Moved to bottom */}
-        <div className="live-prices-section">
-          <h2 className="section-title">Live Market Prices</h2>
+        {/* Divider */}
+        <Divider
+          sx={{
+            my: 6,
+            borderColor: "rgba(255, 255, 255, 0.1)",
+            "&::before, &::after": {
+              borderColor: "rgba(255, 255, 255, 0.1)",
+            },
+          }}
+        />
+
+        {/* Live Market Prices Section */}
+        <Box sx={{ mb: 4 }}>
           <PriceBoard
             tickers={["AAPL", "MSFT", "GOOGL", "TSLA", "AMZN", "NVDA"]}
           />
-        </div>
-      </div>
-    </div>
+        </Box>
+      </Container>
+    </Box>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemeContextProvider>
+      <AppContent />
+    </ThemeContextProvider>
   );
 }
